@@ -62,5 +62,11 @@
         "branch-alias": {
             "dev-v4": "4.x-dev"
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/pur4u/documentarian.git"
+        }
+    ]
 }
