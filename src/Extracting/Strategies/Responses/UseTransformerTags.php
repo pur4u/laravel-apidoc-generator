@@ -4,6 +4,7 @@ namespace Mpociot\ApiDoc\Extracting\Strategies\Responses;
 
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Model as IlluminateModel;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
 use League\Fractal\Manager;
@@ -34,7 +35,7 @@ class UseTransformerTags extends Strategy
      *
      * @return array|null
      */
-    public function __invoke(Route $route, \ReflectionClass $controller, \ReflectionMethod $method, array $rulesToApply, array $context = [])
+    public function __invoke(Route $route, ReflectionClass $controller, ReflectionMethod $method, array $rulesToApply, array $context = [])
     {
         $docBlocks = RouteDocBlocker::getDocBlocksFromRoute($route);
         /** @var DocBlock $methodDocBlock */
@@ -47,6 +48,7 @@ class UseTransformerTags extends Strategy
      * Get a response from the transformer tags.
      *
      * @param array $tags
+     * @param Route $route
      *
      * @return array|null
      */
@@ -57,7 +59,7 @@ class UseTransformerTags extends Strategy
                 return null;
             }
 
-            list($statusCode, $transformer) = $this->getStatusCodeAndTransformerClass($transformerTag);
+            [$statusCode, $transformer] = $this->getStatusCodeAndTransformerClass($transformerTag);
             $model = $this->getClassToBeTransformed($tags, (new ReflectionClass($transformer))->getMethod('transform'));
             $modelInstance = $this->instantiateTransformerModel($model);
 
@@ -70,8 +72,9 @@ class UseTransformerTags extends Strategy
             $resource = (strtolower($transformerTag->getName()) == 'transformercollection')
                 ? new Collection(
                     [$modelInstance, $this->instantiateTransformerModel($model)],
-                    new $transformer)
-                : new Item($modelInstance, new $transformer);
+                    new $transformer()
+                )
+                : new Item($modelInstance, new $transformer());
 
             $response = response($fractal->createData($resource)->toJson());
 
@@ -81,8 +84,8 @@ class UseTransformerTags extends Strategy
                     'content' => $response->getContent(),
                 ],
             ];
-        } catch (\Exception $e) {
-            echo 'Exception thrown when fetching transformer response for ['.implode(',', $route->methods)."] {$route->uri}.\n";
+        } catch (Exception $e) {
+            echo 'Exception thrown when fetching transformer response for [' . implode(',', $route->methods) . "] {$route->uri}.\n";
             if (Flags::$shouldBeVerbose) {
                 Utils::dumpException($e);
             } else {
@@ -112,6 +115,8 @@ class UseTransformerTags extends Strategy
      * @param array $tags
      * @param ReflectionMethod $transformerMethod
      *
+     * @throws Exception
+     *
      * @return string
      */
     private function getClassToBeTransformed(array $tags, ReflectionMethod $transformerMethod): string
@@ -125,9 +130,9 @@ class UseTransformerTags extends Strategy
             $type = $modelTag->getContent();
         } else {
             $parameter = Arr::first($transformerMethod->getParameters());
-            if ($parameter->hasType() && ! $parameter->getType()->isBuiltin() && class_exists((string) $parameter->getType())) {
+            if ($parameter->hasType() && ! $parameter->getType()->isBuiltin() && class_exists($parameter->getType()->getName())) {
                 // Ladies and gentlemen, we have a type!
-                $type = (string) $parameter->getType();
+                $type = $parameter->getType()->getName();
             }
         }
 
@@ -153,20 +158,20 @@ class UseTransformerTags extends Strategy
             $type = ltrim($type, '\\');
 
             return factory($type)->make();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             if (Flags::$shouldBeVerbose) {
                 echo "Eloquent model factory failed to instantiate {$type}; trying to fetch from database.\n";
             }
 
-            $instance = new $type;
-            if ($instance instanceof \Illuminate\Database\Eloquent\Model) {
+            $instance = new $type();
+            if ($instance instanceof IlluminateModel) {
                 try {
                     // we can't use a factory but can try to get one from the database
                     $firstInstance = $type::first();
                     if ($firstInstance) {
                         return $firstInstance;
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     // okay, we'll stick with `new`
                     if (Flags::$shouldBeVerbose) {
                         echo "Failed to fetch first {$type} from database; using `new` to instantiate.\n";

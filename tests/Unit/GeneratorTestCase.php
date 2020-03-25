@@ -4,6 +4,7 @@
 
 namespace Mpociot\ApiDoc\Tests\Unit;
 
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use Illuminate\Support\Arr;
 use Mpociot\ApiDoc\ApiDocGeneratorServiceProvider;
 use Mpociot\ApiDoc\Extracting\Generator;
@@ -14,6 +15,8 @@ use Orchestra\Testbench\TestCase;
 
 abstract class GeneratorTestCase extends TestCase
 {
+    use ArraySubsetAsserts;
+
     /**
      * @var \Mpociot\ApiDoc\Extracting\Generator
      */
@@ -166,6 +169,64 @@ abstract class GeneratorTestCase extends TestCase
                 'value' => 'Doe',
             ],
         ], $bodyParameters);
+    }
+
+    /** @test */
+    public function can_parse_body_parameters_as_array()
+    {
+        $route = $this->createRoute('GET', '/api/test', 'withBodyParametersAsArray');
+        $generator = $this->generator->processRoute($route);
+        $bodyParameters = $generator['bodyParameters'];
+        $cleanBodyParameters = $generator['cleanBodyParameters'];
+
+        $this->assertArraySubset([
+            '*.first_name' => [
+                'type' => 'string',
+                'description' => 'The first name of the user.',
+                'required' => false,
+                'value' => 'John',
+            ],
+            '*.last_name' => [
+                'type' => 'string',
+                'description' => 'The last name of the user.',
+                'required' => false,
+                'value' => 'Doe',
+            ],
+            '*.contacts.*.first_name' => [
+                'type' => 'string',
+                'description' => 'The first name of the contact.',
+                'required' => false,
+                'value' => 'John',
+            ],
+            '*.contacts.*.last_name' => [
+                'type' => 'string',
+                'description' => 'The last name of the contact.',
+                'required' => false,
+                'value' => 'Doe',
+            ],
+            '*.roles.*' => [
+                'type' => 'string',
+                'description' => 'The name of the role.',
+                'required' => false,
+                'value' => 'Admin',
+            ],
+        ], $bodyParameters);
+
+        $this->assertArraySubset([
+            [
+               'first_name' => 'John',
+               'last_name' => 'Doe',
+               'contacts' => [
+                    [
+                        'first_name' => 'John',
+                        'last_name' => 'Doe',
+                    ]
+                ],
+                'roles' => [
+                    'Admin'
+                ]
+            ]
+        ], $cleanBodyParameters);
     }
 
     /** @test */
@@ -625,7 +686,7 @@ abstract class GeneratorTestCase extends TestCase
         $this->assertEquals(200, $response['status']);
         $this->assertSame(
             $response['content'],
-            '{"data":[{"id":1,"description":"Welcome on this test versions","name":"TestName"},'.
+            '{"data":[{"id":1,"description":"Welcome on this test versions","name":"TestName"},' .
             '{"id":1,"description":"Welcome on this test versions","name":"TestName"}]}'
         );
     }
@@ -644,7 +705,7 @@ abstract class GeneratorTestCase extends TestCase
         $this->assertEquals(200, $response['status']);
         $this->assertSame(
             $response['content'],
-            '{"data":[{"id":1,"description":"Welcome on this test versions","name":"TestName"},'.
+            '{"data":[{"id":1,"description":"Welcome on this test versions","name":"TestName"},' .
             '{"id":1,"description":"Welcome on this test versions","name":"TestName"}]}'
         );
     }
@@ -792,7 +853,7 @@ abstract class GeneratorTestCase extends TestCase
     public function can_parse_response_file_tag()
     {
         // copy file to storage
-        $filePath = __DIR__.'/../Fixtures/response_test.json';
+        $filePath = __DIR__ . '/../Fixtures/response_test.json';
         $fixtureFileJson = file_get_contents($filePath);
         copy($filePath, storage_path('response_test.json'));
 
@@ -817,7 +878,7 @@ abstract class GeneratorTestCase extends TestCase
     public function can_add_or_replace_key_value_pair_in_response_file()
     {
         // copy file to storage
-        $filePath = __DIR__.'/../Fixtures/response_test.json';
+        $filePath = __DIR__ . '/../Fixtures/response_test.json';
         $fixtureFileJson = file_get_contents($filePath);
         copy($filePath, storage_path('response_test.json'));
 
@@ -842,10 +903,10 @@ abstract class GeneratorTestCase extends TestCase
     public function can_parse_multiple_response_file_tags_with_status_codes()
     {
         // copy file to storage
-        $successFilePath = __DIR__.'/../Fixtures/response_test.json';
+        $successFilePath = __DIR__ . '/../Fixtures/response_test.json';
         $successFixtureFileJson = file_get_contents($successFilePath);
         copy($successFilePath, storage_path('response_test.json'));
-        $errorFilePath = __DIR__.'/../Fixtures/response_error_test.json';
+        $errorFilePath = __DIR__ . '/../Fixtures/response_error_test.json';
         $errorFixtureFileJson = file_get_contents($errorFilePath);
         copy($errorFilePath, storage_path('response_error_test.json'));
 

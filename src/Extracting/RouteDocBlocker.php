@@ -20,6 +20,7 @@ class RouteDocBlocker
      * @param Route $route
      *
      * @throws \ReflectionException
+     * @throws \Exception
      *
      * @return array<string, DocBlock> Method and class docblocks
      */
@@ -62,9 +63,9 @@ class RouteDocBlocker
     private static function getRouteCacheId(Route $route, string $className, string $methodName): string
     {
         return $route->uri()
-            .':'
-            .implode(array_diff($route->methods(), ['HEAD']))
-            .$className
-            .$methodName;
+            . ':'
+            . implode(array_diff($route->methods(), ['HEAD']))
+            . $className
+            . $methodName;
     }
 }

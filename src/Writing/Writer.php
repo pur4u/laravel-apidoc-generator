@@ -91,8 +91,8 @@ class Writer
      */
     public function writeMarkdownAndSourceFiles(Collection $parsedRoutes)
     {
-        $targetFile = $this->sourceOutputPath.'/source/index.md';
-        $compareFile = $this->sourceOutputPath.'/source/.compare.md';
+        $targetFile = $this->sourceOutputPath . '/source/index.md';
+        $compareFile = $this->sourceOutputPath . '/source/.compare.md';
 
         $infoText = view('apidoc::partials.info')
             ->with('outputPath', 'docs')
@@ -116,14 +116,14 @@ class Writer
 
             $parsedRouteOutput->transform(function (Collection $routeGroup) use ($generatedDocumentation, $compareDocumentation) {
                 return $routeGroup->transform(function (array $route) use ($generatedDocumentation, $compareDocumentation) {
-                    if (preg_match('/<!-- START_'.$route['id'].' -->(.*)<!-- END_'.$route['id'].' -->/is', $generatedDocumentation, $existingRouteDoc)) {
-                        $routeDocumentationChanged = (preg_match('/<!-- START_'.$route['id'].' -->(.*)<!-- END_'.$route['id'].' -->/is', $compareDocumentation, $lastDocWeGeneratedForThisRoute) && $lastDocWeGeneratedForThisRoute[1] !== $existingRouteDoc[1]);
+                    if (preg_match('/<!-- START_' . $route['id'] . ' -->(.*)<!-- END_' . $route['id'] . ' -->/is', $generatedDocumentation, $existingRouteDoc)) {
+                        $routeDocumentationChanged = (preg_match('/<!-- START_' . $route['id'] . ' -->(.*)<!-- END_' . $route['id'] . ' -->/is', $compareDocumentation, $lastDocWeGeneratedForThisRoute) && $lastDocWeGeneratedForThisRoute[1] !== $existingRouteDoc[1]);
                         if ($routeDocumentationChanged === false || $this->forceIt) {
                             if ($routeDocumentationChanged) {
-                                $this->output->warn('Discarded manual changes for route ['.implode(',', $route['methods']).'] '.$route['uri']);
+                                $this->output->warn('Discarded manual changes for route [' . implode(',', $route['methods']) . '] ' . $route['uri']);
                             }
                         } else {
-                            $this->output->warn('Skipping modified route ['.implode(',', $route['methods']).'] '.$route['uri']);
+                            $this->output->warn('Skipping modified route [' . implode(',', $route['methods']) . '] ' . $route['uri']);
                             $route['modified_output'] = $existingRouteDoc[0];
                         }
                     }
@@ -146,7 +146,7 @@ class Writer
             ->with('showPostmanCollectionButton', $this->shouldGeneratePostmanCollection)
             ->with('parsedRoutes', $parsedRouteOutput);
 
-        $this->output->info('Writing index.md and source files to: '.$this->sourceOutputPath);
+        $this->output->info('Writing index.md and source files to: ' . $this->sourceOutputPath);
 
         if (! is_dir($this->sourceOutputPath)) {
             $documentarian = new Documentarian();
@@ -169,7 +169,7 @@ class Writer
 
         file_put_contents($compareFile, $compareMarkdown);
 
-        $this->output->info('Wrote index.md and source files to: '.$this->sourceOutputPath);
+        $this->output->info('Wrote index.md and source files to: ' . $this->sourceOutputPath);
     }
 
     public function generateMarkdownOutputForEachRoute(Collection $parsedRoutes, array $settings): Collection
@@ -223,25 +223,29 @@ class Writer
      */
     public function generatePostmanCollection(Collection $routes)
     {
-        $writer = new PostmanCollectionWriter($routes, $this->baseUrl);
+        /** @var PostmanCollectionWriter $writer */
+        $writer = app()->makeWith(
+            PostmanCollectionWriter::class,
+            ['routeGroups' => $routes, 'baseUrl' => $this->baseUrl]
+        );
 
         return $writer->getCollection();
     }
 
     protected function getMarkdownToPrepend(): string
     {
-        $prependFile = $this->sourceOutputPath.'/source/prepend.md';
+        $prependFile = $this->sourceOutputPath . '/source/prepend.md';
         $prependFileContents = file_exists($prependFile)
-            ? file_get_contents($prependFile)."\n" : '';
+            ? file_get_contents($prependFile) . "\n" : '';
 
         return $prependFileContents;
     }
 
     protected function getMarkdownToAppend(): string
     {
-        $appendFile = $this->sourceOutputPath.'/source/append.md';
+        $appendFile = $this->sourceOutputPath . '/source/append.md';
         $appendFileContents = file_exists($appendFile)
-            ? "\n".file_get_contents($appendFile) : '';
+            ? "\n" . file_get_contents($appendFile) : '';
 
         return $appendFileContents;
     }
@@ -279,7 +283,7 @@ class Writer
             $contents = str_replace('href="css/style.css"', 'href="/docs/css/style.css"', $contents);
             $contents = str_replace('src="js/all.js"', 'src="/docs/js/all.js"', $contents);
             $contents = str_replace('src="images/', 'src="/docs/images/', $contents);
-            $contents = preg_replace('#href="http://.+?/docs/collection.json"#', 'href="{{ route("apidoc", ["format" => ".json"]) }}"', $contents);
+            $contents = preg_replace('#href="https?://.+?/docs/collection.json"#', 'href="{{ route("apidoc", ["format" => ".json"]) }}"', $contents);
             file_put_contents("$this->outputPath/index.blade.php", $contents);
         }
     }

@@ -47,16 +47,18 @@ class Generator
      * @param \Illuminate\Routing\Route $route
      * @param array $routeRules Rules to apply when generating documentation for this route
      *
+     * @throws \ReflectionException
+     *
      * @return array
      */
     public function processRoute(Route $route, array $routeRules = [])
     {
-        list($controllerName, $methodName) = Utils::getRouteClassAndMethodNames($route->getAction());
+        [$controllerName, $methodName] = Utils::getRouteClassAndMethodNames($route->getAction());
         $controller = new ReflectionClass($controllerName);
         $method = $controller->getMethod($methodName);
 
         $parsedRoute = [
-            'id' => md5($this->getUri($route).':'.implode($this->getMethods($route))),
+            'id' => md5($this->getUri($route) . ':' . implode($this->getMethods($route))),
             'methods' => $this->getMethods($route),
             'uri' => $this->getUri($route),
         ];
@@ -211,7 +213,9 @@ class Generator
 
         foreach ($params as $paramName => $details) {
             $this->generateConcreteSampleForArrayKeys(
-                $paramName, $details['value'], $values
+                $paramName,
+                $details['value'],
+                $values
             );
         }
 
@@ -235,6 +239,6 @@ class Generator
             $paramName = str_replace(['][', '[', ']', '..'], ['.', '.', '', '.*.'], $paramName);
         }
         // Then generate a sample item for the dot notation
-        Arr::set($values, str_replace('.*', '.0', $paramName), $paramExample);
+        Arr::set($values, str_replace(['.*', '*.'], ['.0','0.'], $paramName), $paramExample);
     }
 }
