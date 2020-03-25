@@ -20,7 +20,6 @@
         "illuminate/routing": "^5.7|^6.0",
         "illuminate/support": "^5.7|^6.0",
         "illuminate/console": "^5.7|^6.0",
-        "mpociot/documentarian": "dev-master",
         "mpociot/reflection-docblock": "^1.0.1",
         "ramsey/uuid": "^3.8",
         "symfony/var-exporter": "^4.0",
@@ -62,11 +61,5 @@
         "branch-alias": {
             "dev-v4": "4.x-dev"
         }
-    },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/pur4u/documentarian.git"
-        }
-    ]
+    }
 }
