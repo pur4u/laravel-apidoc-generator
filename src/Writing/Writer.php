@@ -66,7 +66,7 @@ class Writer
         $this->documentarian = new Documentarian();
         $this->isStatic = $this->config->get('type') === 'static';
         $this->sourceOutputPath = 'resources/docs';
-        $this->outputPath = $this->isStatic ? 'public/docs' : 'resources/views/apidoc';
+        $this->outputPath = $this->isStatic ? ($this->config->get('output_folder') ?? 'public/docs') : 'resources/views/apidoc';
     }
 
     public function writeDocs(Collection $routes)
@@ -206,8 +206,13 @@ class Writer
                 $collectionPath = "{$this->outputPath}/collection.json";
                 file_put_contents($collectionPath, $collection);
             } else {
-                Storage::disk('local')->put('apidoc/collection.json', $collection);
-                $collectionPath = 'storage/app/apidoc/collection.json';
+                $storageInstance = Storage::disk($this->config->get('storage'));
+                $storageInstance->put('apidoc/collection.json', $collection, 'public');
+                if ($this->config->get('storage') == 'local') {
+                    $collectionPath = 'storage/app/apidoc/collection.json';
+                } else {
+                    $collectionPath = $storageInstance->url('collection.json');
+                }
             }
 
             $this->output->info("Wrote Postman collection to: {$collectionPath}");
@@ -252,7 +257,7 @@ class Writer
 
     protected function copyAssetsFromSourceFolderToPublicFolder(): void
     {
-        $publicPath = 'public/docs';
+        $publicPath = $this->config->get('output_folder') ?? 'public/docs';
         if (! is_dir($publicPath)) {
             mkdir($publicPath, 0777, true);
             mkdir("{$publicPath}/css");
@@ -280,10 +285,10 @@ class Writer
             rename("{$this->sourceOutputPath}/index.html", "$this->outputPath/index.blade.php");
             $contents = file_get_contents("$this->outputPath/index.blade.php");
             //
-            $contents = str_replace('href="css/style.css"', 'href="/docs/css/style.css"', $contents);
-            $contents = str_replace('src="js/all.js"', 'src="/docs/js/all.js"', $contents);
+            $contents = str_replace('href="css/style.css"', 'href="{{ asset(\'/docs/css/style.css\') }}"', $contents);
+            $contents = str_replace('src="js/all.js"', 'src="{{ asset(\'/docs/js/all.js\') }}"', $contents);
             $contents = str_replace('src="images/', 'src="/docs/images/', $contents);
-            $contents = preg_replace('#href="https?://.+?/docs/collection.json"#', 'href="{{ route("apidoc", ["format" => ".json"]) }}"', $contents);
+            $contents = preg_replace('#href="https?://.+?/docs/collection.json"#', 'href="{{ route("apidoc.json") }}"', $contents);
             file_put_contents("$this->outputPath/index.blade.php", $contents);
         }
     }

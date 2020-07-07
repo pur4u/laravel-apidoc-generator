@@ -10,3 +10,5 @@ parameters:
         - '#Call to an undefined method Illuminate\\Routing\\Route::versions().#'
         - '#(.*)NunoMaduro\\Collision(.*)#'
         - '#Instantiated class Whoops\\Exception\\Inspector not found\.#'
+        - '#.+Dingo.+#'
+        - '#Call to an undefined method Illuminate\\Contracts\\Filesystem\\Filesystem::url()#'

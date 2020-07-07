@@ -1,3 +1,7 @@
+---
+title: Documenting Your API
+order: 4
+---
 # Documenting Your API
 This package generates documentation from your code using mainly annotations (in doc block comments).
 
@@ -45,7 +49,7 @@ class UserController extends Controller
 
 **Result:** 
 
-![Doc block result](http://headsquaredsoftware.co.uk/images/api_generator_docblock.png)
+![Doc block result](/img/api_generator_docblock.png)
 
 ## Specifying request parameters
 To specify a list of valid parameters your API route accepts, use the `@urlParam`, `@bodyParam` and `@queryParam` annotations.
@@ -92,12 +96,6 @@ public function listPosts()
 
 They will be included in the generated documentation text and example requests.
 
-**Result:**
-
-![](body_params_1.png)
-
-![](body_params_2.png)
-
 ### Example parameters
 For each parameter in your request, this package will generate a random value to be used in the example requests. If you'd like to specify an example value, you can do so by adding `Example: your-example` to the end of your description. For instance:
 
@@ -114,11 +112,11 @@ For each parameter in your request, this package will generate a random value to
 
 You can also exclude a particular parameter from the generated examples (for all languages) by annotating it with `No-example`. For instance:
 ```php
-       /**
-        * @queryParam location_id required The id of the location. Example: 1
-        * @queryParam user_id required The id of the user. No-example
-        * @queryParam page required The page number. Example: 4
-        */
+    /**
+    * @queryParam location_id required The id of the location. Example: 1
+    * @queryParam user_id required The id of the user. No-example
+    * @queryParam page required The page number. Example: 4
+    */
 ```
 Outputs: 
 ```bash
@@ -150,6 +148,41 @@ public function createPost(MyRequest $request)
 
 ## Indicating authentication status
 You can use the `@authenticated` annotation on a method to indicate if the endpoint is authenticated. A "Requires authentication" badge will be added to that route in the generated documentation.
+
+Just like `@group` annotation, you can also specify an `@authenticated` on a single method to override the authenticated status defined at the controller level.
+
+```php
+/**
+ * @authenticated
+ *
+ * APIs for managing users
+ */
+class UserController extends Controller
+{
+
+	/**
+	 * Create a user
+	 *
+	 * [Insert optional longer description of the API endpoint here.]
+	 *
+	 */
+	 public function createUser()
+	 {
+
+	 }
+	 
+	/**
+	 * @group Account management
+	 *
+	 */
+	 public function changePassword()
+	 {
+
+	 }
+}
+```
+
+Now all the methods under this controller will have "Requires authentication" badge enabled.
 
 ## Providing an example response
 You can provide an example response for a route. This will be displayed in the examples section. There are several ways of doing this.

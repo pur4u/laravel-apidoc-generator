@@ -13,6 +13,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## 4.8.0 - Saturday, 2 May 2020 ([compare to previous](https://github.com/mpociot/laravel-apidoc-generator/compare/4.7.0...4.8.0))
+### Added
+- Support @hideFromAPIDocumentation on controllers. (https://github.com/mpociot/laravel-apidoc-generator/pull/745)
+- Allow strategies to return null. (https://github.com/mpociot/laravel-apidoc-generator/pull/739)
+
+## 4.7.0 - Sunday, 12 April 2020 ([compare to previous](https://github.com/mpociot/laravel-apidoc-generator/compare/4.6.0...4.7.0))
+### Added
+- Support for Laravel Vapor. (https://github.com/mpociot/laravel-apidoc-generator/pull/729)
+- Allow customization of static output path. (https://github.com/mpociot/laravel-apidoc-generator/pull/730)
+
+## 4.6.0 - Wednesday, 8 April 2020 ([compare to previous](https://github.com/mpociot/laravel-apidoc-generator/compare/4.5.1...4.6.0))
+### Added
+- Allow `@authenticated` to be set at controller level. (https://github.com/mpociot/laravel-apidoc-generator/pull/726)
+
+## 4.5.1 - Saturday, 4 April 2020 ([compare to previous](https://github.com/mpociot/laravel-apidoc-generator/compare/4.5.0...4.5.1))
+### Fixed
+- Fix version constraint...again. (https://github.com/mpociot/laravel-apidoc-generator/pull/725)
+
+## 4.5.0 - Tuesday, 31 March 2020 ([compare to previous](https://github.com/mpociot/laravel-apidoc-generator/compare/4.4.3...4.5.0))
+### Fixed
+- Fix version constraints preventing installation on some Laravel 7 installations.
+
+## 4.4.3 - Thursday, 26 March 2020 ([compare to previous](https://github.com/mpociot/laravel-apidoc-generator/compare/4.4.2...4.4.3))
+### Fixed
+- Fixed link to Postman connection in docs when Laravel autoload is used (https://github.com/mpociot/laravel-apidoc-generator/pull/714)
+
 ## 4.4.2 - Sunday, 21 March 2020 ([compare to previous](https://github.com/mpociot/laravel-apidoc-generator/compare/4.4.1...4.4.2))
 ### Fixed
 - Fixed double json encode when fetching collection in Laravel type docs (https://github.com/mpociot/laravel-apidoc-generator/pull/713)

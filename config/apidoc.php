@@ -10,6 +10,11 @@ return [
     'type' => 'static',
 
     /*
+     * Static output folder: HTML documentation and assets will be generated in this folder.
+     */
+   'output_folder' => 'public/docs',
+
+    /*
      * Settings for `laravel` type output.
      */
     'laravel' => [
@@ -36,6 +41,13 @@ return [
      * The router to be used (Laravel or Dingo).
      */
     'router' => 'laravel',
+
+    /*
+     * The storage to be used when generating assets.
+     * By default, uses 'local'. If you are using Laravel Vapor, please use S3 and make sure
+     * the correct bucket is correctly configured in the .env file
+     */
+    'storage' => 'local',
 
     /*
      * The base URL to be used in examples and the Postman collection.
